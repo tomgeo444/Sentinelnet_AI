@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SentinelNet AI - Real-Time AI Network Intrusion Detection</title>
+    <!-- Google Fonts & Font Awesome Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="soc-container">
+        <!-- Top Navigation / Header -->
+        <header class="soc-header">
+            <div class="logo-group">
+                <div class="logo-icon"><i class="fa-solid fa-shield-halved"></i></div>
+                <div>
+                    <h1 class="logo-title">SENTINELNET <span class="ai-badge">AI</span></h1>
+                    <p class="logo-subtitle">Real-Time Network Intrusion Detection & Monitoring System</p>
+                </div>
+            </div>
+
+            <!-- System Status Badges -->
+            <div class="system-status-panel">
+                <div class="status-item" id="status-backend">
+                    <span class="status-dot green"></span>
+                    <span class="status-label">Backend:</span>
+                    <span class="status-value" id="val-backend">ONLINE</span>
+                </div>
+                <div class="status-item" id="status-database">
+                    <span class="status-dot green"></span>
+                    <span class="status-label">Database:</span>
+                    <span class="status-value" id="val-database">CONNECTED</span>
+                </div>
+                <div class="status-item" id="status-model">
+                    <span class="status-dot green"></span>
+                    <span class="status-label">Model:</span>
+                    <span class="status-value" id="val-model">1D-CNN LOADED</span>
+                </div>
+                <div class="status-item" id="status-interface">
+                    <span class="status-dot cyan"></span>
+                    <span class="status-label">Interface:</span>
+                    <span class="status-value" id="val-interface">lo</span>
+                </div>
+                <div class="status-item" id="status-monitoring">
+                    <span class="status-dot red" id="monitoring-dot"></span>
+                    <span class="status-label">Monitoring:</span>
+                    <span class="status-value" id="val-monitoring">INACTIVE</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Command & Control Toolbar -->
+        <section class="control-toolbar">
+            <div class="monitor-controls">
+                <button id="btn-start" class="btn btn-primary"><i class="fa-solid fa-play"></i> START MONITORING</button>
+                <button id="btn-stop" class="btn btn-danger" disabled><i class="fa-solid fa-stop"></i> STOP MONITORING</button>
+                <div class="iface-selector-group">
+                    <label for="iface-select"><i class="fa-solid fa-network-wired"></i> Interface:</label>
+                    <select id="iface-select" class="soc-select">
+                        <option value="lo">lo (127.0.0.1)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="demo-controls">
+                <span class="demo-label"><i class="fa-solid fa-flask"></i> Safe Local Traffic Generator:</span>
+                <button class="btn btn-demo" data-mode="normal"><i class="fa-solid fa-check"></i> Normal Traffic</button>
+                <button class="btn btn-demo" data-mode="portscan"><i class="fa-solid fa-radar"></i> Port Scan</button>
+                <button class="btn btn-demo" data-mode="synflood"><i class="fa-solid fa-bolt"></i> SYN Flood (DoS)</button>
+                <button class="btn btn-demo" data-mode="udpflood"><i class="fa-solid fa-water"></i> UDP Burst</button>
+            </div>
+        </section>
+
+        <!-- Latest Threat Alert Banner -->
+        <section class="alert-banner" id="alert-banner" style="display: none;">
+            <div class="alert-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+            <div class="alert-content">
+                <div class="alert-title-row">
+                    <span class="alert-badge" id="alert-risk">HIGH RISK</span>
+                    <h3 id="alert-type">INTRUSION DETECTED: PortScan</h3>
+                    <span class="alert-time" id="alert-timestamp">--:--:--</span>
+                </div>
+                <div class="alert-meta-row">
+                    <span><strong>Source:</strong> <span id="alert-src">127.0.0.1:45020</span></span>
+                    <span><strong>Destination:</strong> <span id="alert-dst">127.0.0.1:8105</span></span>
+                    <span><strong>Protocol:</strong> <span id="alert-proto">TCP</span></span>
+                    <span><strong>Confidence:</strong> <span id="alert-conf">98.4%</span></span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Live Statistics Overview -->
+        <section class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon cyan"><i class="fa-solid fa-layer-group"></i></div>
+                <div class="stat-body">
+                    <span class="stat-title">Packets Captured</span>
+                    <h2 class="stat-number" id="stat-packets">0</h2>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon blue"><i class="fa-solid fa-diagram-project"></i></div>
+                <div class="stat-body">
+                    <span class="stat-title">Flows Processed</span>
+                    <h2 class="stat-number" id="stat-flows">0</h2>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon green"><i class="fa-solid fa-shield-check"></i></div>
+                <div class="stat-body">
+                    <span class="stat-title">Normal Traffic</span>
+                    <h2 class="stat-number" id="stat-normal">0</h2>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon amber"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                <div class="stat-body">
+                    <span class="stat-title">Suspicious Traffic</span>
+                    <h2 class="stat-number" id="stat-suspicious">0</h2>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon red"><i class="fa-solid fa-skull-crossbones"></i></div>
+                <div class="stat-body">
+                    <span class="stat-title">Detected Attacks</span>
+                    <h2 class="stat-number" id="stat-attacks">0</h2>
+                </div>
+            </div>
+        </section>
+
+        <!-- Real-Time Charts Section -->
+        <section class="charts-grid">
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h3><i class="fa-solid fa-chart-line"></i> Flow Throughput (Time Series)</h3>
+                </div>
+                <div class="chart-container">
+                    <canvas id="chart-throughput"></canvas>
+                </div>
+            </div>
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h3><i class="fa-solid fa-chart-pie"></i> Normal vs Attack Distribution</h3>
+                </div>
+                <div class="chart-container">
+                    <canvas id="chart-pie"></canvas>
+                </div>
+            </div>
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h3><i class="fa-solid fa-chart-column"></i> Attack Category Breakdown</h3>
+                </div>
+                <div class="chart-container">
+                    <canvas id="chart-attacks"></canvas>
+                </div>
+            </div>
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h3><i class="fa-solid fa-network-wired"></i> Protocol Breakdown</h3>
+                </div>
+                <div class="chart-container">
+                    <canvas id="chart-protocols"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- Live Detection & Traffic Stream Table -->
+        <section class="table-section">
+            <div class="table-header-row">
+                <div class="table-title">
+                    <h3><i class="fa-solid fa-list-check"></i> Live Traffic Detections Stream</h3>
+                    <span class="badge-live"><span class="pulse-dot"></span> STREAMING</span>
+                </div>
+                <div class="table-filters">
+                    <button class="filter-btn active" data-filter="all">All Traffic</button>
+                    <button class="filter-btn" data-filter="attacks">Attacks Only</button>
+                    <button class="filter-btn" data-filter="critical">High/Critical Risk</button>
+                </div>
+            </div>
+
+            <div class="table-wrapper">
+                <table class="soc-table" id="detections-table">
+                    <thead>
+                        <tr>
+                            <th>Timestamp</th>
+                            <th>Source</th>
+                            <th>Destination</th>
+                            <th>Protocol</th>
+                            <th>Prediction</th>
+                            <th>Confidence</th>
+                            <th>Risk Level</th>
+                            <th>Duration (s)</th>
+                            <th>Packets</th>
+                            <th>Bytes</th>
+                        </tr>
+                    </thead>
+                    <tbody id="detections-tbody">
+                        <tr class="empty-row">
+                            <td colspan="10"><i class="fa-solid fa-circle-info"></i> Waiting for network traffic... Start monitoring or click a demo traffic button.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Deep Learning Model Information Card -->
+        <section class="model-info-section">
+            <div class="model-card">
+                <div class="model-card-header">
+                    <h3><i class="fa-solid fa-brain"></i> Deep Learning Model Architecture & Benchmark Metrics</h3>
+                    <span class="badge-model">PyTorch 1D-CNN</span>
+                </div>
+                <div class="model-meta-grid">
+                    <div class="meta-item">
+                        <span class="meta-label">Architecture</span>
+                        <span class="meta-value" id="model-arch">1D-CNN (Conv1D + BatchNorm + Dense Residual)</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label">Dataset Benchmark</span>
+                        <span class="meta-value" id="model-dataset">CICIDS2017 Statistical Flow Distribution</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label">Input Features</span>
+                        <span class="meta-value" id="model-features">22 Continuous Flow Statistics</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label">Classes</span>
+                        <span class="meta-value" id="model-classes">5 (BENIGN, DoS_DDoS, PortScan, BruteForce, Bot)</span>
+                    </div>
+                </div>
+
+                <!-- Academic Evaluation Metrics Row -->
+                <div class="metrics-row">
+                    <div class="metric-box">
+                        <span class="metric-title">Test Accuracy</span>
+                        <span class="metric-val green" id="metric-acc">--%</span>
+                    </div>
+                    <div class="metric-box">
+                        <span class="metric-title">Precision (Macro)</span>
+                        <span class="metric-val cyan" id="metric-prec">--%</span>
+                    </div>
+                    <div class="metric-box">
+                        <span class="metric-title">Recall (Macro)</span>
+                        <span class="metric-val blue" id="metric-rec">--%</span>
+                    </div>
+                    <div class="metric-box">
+                        <span class="metric-title">F1-Score (Macro)</span>
+                        <span class="metric-val amber" id="metric-f1">--%</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="soc-footer">
+            <p>SentinelNet AI &bull; Deep Learning Real-Time Network Intrusion Detection System &bull; Academic Project Demonstration</p>
+        </footer>
+    </div>
+
+    <!-- Application Script -->
+    <script src="/static/js/app.js"></script>
+</body>
+</html>

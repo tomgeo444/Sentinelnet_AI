@@ -1,0 +1,25 @@
+# Python / venv
+venv/
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Pytest / Cache
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Environment / Local Database
+.env
+sentinelnet.db
+*.sqlite
+*.sqlite3
+*.log
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
