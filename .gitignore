@@ -23,3 +23,11 @@ sentinelnet.db
 .idea/
 *.swp
 *.swo
+
+# Sub-projects
+androidpro/
+
+# Presentations
+*.pptx
+docs/*presentation*
+docs/*Presentation*
